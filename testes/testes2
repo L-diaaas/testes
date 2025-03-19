@@ -1,0 +1,287 @@
+import unittest
+from unittest.mock import patch, MagicMock
+
+BASE_URL = "http://127.0.0.1:5000/alunos"
+
+class TestAlunosAPI(unittest.TestCase):
+
+    def setUp(self):
+        self.aluno_exemplo = {
+            "nome": "João Silva",
+            "turma_id": 1,
+            "idade": 20,
+            "data_nascimento": "2005-05-15",
+            "nota_primeiro_semestre": 7.5,
+            "nota_segundo_semestre": 8.0,
+            "media_final": 7.75
+        }
+
+    @patch("requests.post")
+    def test001_criar_aluno(self, mock_post):
+        mock_response = MagicMock()
+        mock_response.status_code = 201
+        mock_response.json.return_value = {
+            "message": "Aluno adicionado com sucesso",
+            "aluno": self.aluno_exemplo
+        }
+        mock_post.return_value = mock_response
+
+        response = mock_post(BASE_URL, json=self.aluno_exemplo)
+
+        self.assertEqual(response.status_code, 201)
+        self.assertEqual(response.json()["message"], "Aluno adicionado com sucesso")
+        self.assertEqual(response.json()["aluno"]["nome"], self.aluno_exemplo["nome"])
+
+    @patch("requests.post")
+    def test002_criar_aluno_invalido(self, mock_post):
+        mock_response = MagicMock()
+        mock_response.status_code = 400
+        mock_response.json.return_value = {"erro": "Dados inválidos"}
+        mock_post.return_value = mock_response
+
+        response = mock_post(BASE_URL, json={})
+
+        self.assertEqual(response.status_code, 400)
+        self.assertIn("erro", response.json())
+
+    @patch("requests.get")
+    def test003_listar_alunos(self, mock_get):
+        mock_response = MagicMock()
+        mock_response.status_code = 200
+        mock_response.json.return_value = []
+        mock_get.return_value = mock_response
+
+        response = mock_get(BASE_URL)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertIsInstance(response.json(), list)
+
+    @patch("requests.get")
+    def test004_obter_aluno_existente(self, mock_get):
+        mock_response = MagicMock()
+        mock_response.status_code = 200
+        mock_response.json.return_value = self.aluno_exemplo
+        mock_get.return_value = mock_response
+
+        response = mock_get(f"{BASE_URL}/1")
+
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("nome", response.json())
+
+    @patch("requests.get")
+    def test005_obter_aluno_inexistente(self, mock_get):
+        mock_response = MagicMock()
+        mock_response.status_code = 404
+        mock_response.json.return_value = {"mensagem": "Aluno não encontrado"}
+        mock_get.return_value = mock_response
+
+        response = mock_get(f"{BASE_URL}/9999")
+
+        self.assertEqual(response.status_code, 404)
+        self.assertIn("mensagem", response.json())
+
+    @patch("requests.put")
+    def test006_atualizar_aluno_existente(self, mock_put):
+        mock_response = MagicMock()
+        mock_response.status_code = 200
+        mock_response.json.return_value = {"aluno": {"nome": "João Souza"}}
+        mock_put.return_value = mock_response
+
+        response = mock_put(f"{BASE_URL}/1", json={"nome": "João Souza"})
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json()["aluno"]["nome"], "João Souza")
+
+    @patch("requests.put")
+    def test007_atualizar_aluno_inexistente(self, mock_put):
+        mock_response = MagicMock()
+        mock_response.status_code = 404
+        mock_response.json.return_value = {"mensagem": "Aluno não encontrado"}
+        mock_put.return_value = mock_response
+
+        response = mock_put(f"{BASE_URL}/9999", json={"nome": "Aluno Inexistente"})
+
+        self.assertEqual(response.status_code, 404)
+        self.assertIn("mensagem", response.json())
+
+    @patch("requests.delete")
+    def test008_excluir_aluno_existente(self, mock_delete):
+        mock_response = MagicMock()
+        mock_response.status_code = 204
+        mock_response.json.return_value = {"mensagem": "Aluno removido com sucesso"}
+        mock_delete.return_value = mock_response
+
+        response = mock_delete(f"{BASE_URL}/1")
+
+        self.assertEqual(response.status_code, 204)
+        self.assertIn("mensagem", response.json())
+
+    @patch("requests.delete")
+    def test009_excluir_aluno_inexistente(self, mock_delete):
+        mock_response = MagicMock()
+        mock_response.status_code = 404
+        mock_response.json.return_value = {"mensagem": "Aluno não encontrado"}
+        mock_delete.return_value = mock_response
+
+        response = mock_delete(f"{BASE_URL}/9999")
+
+        self.assertEqual(response.status_code, 404)
+        self.assertIn("mensagem", response.json())
+
+    @patch("requests.delete")
+    def test010_excluir_todos_alunos(self, mock_delete):
+        mock_response = MagicMock()
+        mock_response.status_code = 200
+        mock_response.json.return_value = {"mensagem": "Todos os alunos foram removidos"}
+        mock_delete.return_value = mock_response
+
+        response = mock_delete(BASE_URL)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("mensagem", response.json())
+
+if __name__ == "__main__":
+    unittest.main()import unittest
+from unittest.mock import patch, MagicMock
+
+BASE_URL = "http://127.0.0.1:5000/alunos"
+
+class TestAlunosAPI(unittest.TestCase):
+
+    def setUp(self):
+        self.aluno_exemplo = {
+            "nome": "João Silva",
+            "turma_id": 1,
+            "idade": 20,
+            "data_nascimento": "2005-05-15",
+            "nota_primeiro_semestre": 7.5,
+            "nota_segundo_semestre": 8.0,
+            "media_final": 7.75
+        }
+
+    @patch("requests.post")
+    def test001_criar_aluno(self, mock_post):
+        mock_response = MagicMock()
+        mock_response.status_code = 201
+        mock_response.json.return_value = {
+            "message": "Aluno adicionado com sucesso",
+            "aluno": self.aluno_exemplo
+        }
+        mock_post.return_value = mock_response
+
+        response = mock_post(BASE_URL, json=self.aluno_exemplo)
+
+        self.assertEqual(response.status_code, 201)
+        self.assertEqual(response.json()["message"], "Aluno adicionado com sucesso")
+        self.assertEqual(response.json()["aluno"]["nome"], self.aluno_exemplo["nome"])
+
+    @patch("requests.post")
+    def test002_criar_aluno_invalido(self, mock_post):
+        mock_response = MagicMock()
+        mock_response.status_code = 400
+        mock_response.json.return_value = {"erro": "Dados inválidos"}
+        mock_post.return_value = mock_response
+
+        response = mock_post(BASE_URL, json={})
+
+        self.assertEqual(response.status_code, 400)
+        self.assertIn("erro", response.json())
+
+    @patch("requests.get")
+    def test003_listar_alunos(self, mock_get):
+        mock_response = MagicMock()
+        mock_response.status_code = 200
+        mock_response.json.return_value = []
+        mock_get.return_value = mock_response
+
+        response = mock_get(BASE_URL)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertIsInstance(response.json(), list)
+
+    @patch("requests.get")
+    def test004_obter_aluno_existente(self, mock_get):
+        mock_response = MagicMock()
+        mock_response.status_code = 200
+        mock_response.json.return_value = self.aluno_exemplo
+        mock_get.return_value = mock_response
+
+        response = mock_get(f"{BASE_URL}/1")
+
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("nome", response.json())
+
+    @patch("requests.get")
+    def test005_obter_aluno_inexistente(self, mock_get):
+        mock_response = MagicMock()
+        mock_response.status_code = 404
+        mock_response.json.return_value = {"mensagem": "Aluno não encontrado"}
+        mock_get.return_value = mock_response
+
+        response = mock_get(f"{BASE_URL}/9999")
+
+        self.assertEqual(response.status_code, 404)
+        self.assertIn("mensagem", response.json())
+
+    @patch("requests.put")
+    def test006_atualizar_aluno_existente(self, mock_put):
+        mock_response = MagicMock()
+        mock_response.status_code = 200
+        mock_response.json.return_value = {"aluno": {"nome": "João Souza"}}
+        mock_put.return_value = mock_response
+
+        response = mock_put(f"{BASE_URL}/1", json={"nome": "João Souza"})
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json()["aluno"]["nome"], "João Souza")
+
+    @patch("requests.put")
+    def test007_atualizar_aluno_inexistente(self, mock_put):
+        mock_response = MagicMock()
+        mock_response.status_code = 404
+        mock_response.json.return_value = {"mensagem": "Aluno não encontrado"}
+        mock_put.return_value = mock_response
+
+        response = mock_put(f"{BASE_URL}/9999", json={"nome": "Aluno Inexistente"})
+
+        self.assertEqual(response.status_code, 404)
+        self.assertIn("mensagem", response.json())
+
+    @patch("requests.delete")
+    def test008_excluir_aluno_existente(self, mock_delete):
+        mock_response = MagicMock()
+        mock_response.status_code = 204
+        mock_response.json.return_value = {"mensagem": "Aluno removido com sucesso"}
+        mock_delete.return_value = mock_response
+
+        response = mock_delete(f"{BASE_URL}/1")
+
+        self.assertEqual(response.status_code, 204)
+        self.assertIn("mensagem", response.json())
+
+    @patch("requests.delete")
+    def test009_excluir_aluno_inexistente(self, mock_delete):
+        mock_response = MagicMock()
+        mock_response.status_code = 404
+        mock_response.json.return_value = {"mensagem": "Aluno não encontrado"}
+        mock_delete.return_value = mock_response
+
+        response = mock_delete(f"{BASE_URL}/9999")
+
+        self.assertEqual(response.status_code, 404)
+        self.assertIn("mensagem", response.json())
+
+    @patch("requests.delete")
+    def test010_excluir_todos_alunos(self, mock_delete):
+        mock_response = MagicMock()
+        mock_response.status_code = 200
+        mock_response.json.return_value = {"mensagem": "Todos os alunos foram removidos"}
+        mock_delete.return_value = mock_response
+
+        response = mock_delete(BASE_URL)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("mensagem", response.json())
+
+if __name__ == "__main__":
+    unittest.main()
